@@ -22,8 +22,20 @@ begin
       return;
    end if;
    
+   -- Проверка существования флагов инициализации
+   if not System_Initialized'Exists or not Game_Initialized'Exists then
+      Error("Флагов инициализации не существует!");
+      return;
+   end if;
+   
    -- Основной блок программы
    begin
+      -- Проверка инициализации консоли
+      if not Console_Initialized then
+         Error("Консоль не инициализирована!");
+         return;
+      end if;
+      
       -- Инициализация системы
       Initialize_System;
       Initialize_Game;
@@ -52,6 +64,16 @@ begin
             Start_Time : constant Time := Clock;
             Input : Character := Get_User_Input;
          begin
+            -- Проверка времени ожидания ввода
+            declare
+               Input_Time : constant Time := Clock;
+               Input_Delay : constant Duration := Input_Time - Start_Time;
+            begin
+               if Input_Delay > 5.0 then
+                  Warning("Длительное ожидание ввода: " & Duration'Image(Input_Delay) & " секунд");
+               end if;
+            end;
+            
             -- Проверка на пустой ввод
             if Input = ASCII.NUL then
                Debug("Пустой ввод получен");
@@ -79,6 +101,7 @@ begin
                   exception
                      when E : others =>
                         Error("Ошибка при обработке команды '" & Input & "': " & Exception_Information(E));
+                        Debug("Последняя обработанная команда: " & Last_Command);
                   end;
             end case;
             
@@ -99,6 +122,8 @@ begin
          end;
       end loop;
       
+      Info("Игровой цикл завершен");
+      
    exception
       when E : others =>
          declare
@@ -113,13 +138,26 @@ finally
    Info("Завершение работы игры");
    begin
       if Initialized then
-         Shutdown_Game;
-         Shutdown_System;
+         begin
+            Shutdown_Game;
+         exception
+            when E : others =>
+               Error("Ошибка при завершении игры: " & Exception_Information(E));
+         end;
+         
+         begin
+            Shutdown_System;
+         exception
+            when E : others =>
+               Error("Ошибка при завершении системы: " & Exception_Information(E));
+         end;
       end if;
+      
+      Finalize_Logging;
+      Put_Line("Спасибо за игру!");
+      
    exception
       when E : others =>
-         Error("Ошибка при завершении: " & Exception_Information(E));
+         Error("Критическая ошибка при завершении: " & Exception_Information(E));
    end;
-   Finalize_Logging;
-   Put_Line("Спасибо за игру!");
 end Main;
