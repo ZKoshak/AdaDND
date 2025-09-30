@@ -1,129 +1,128 @@
 name: AdaDND Build and Test Workflow
 
 on:
- push:
- branches:
- - master
- pull_request:
- branches:
- - master
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
- build:
- name: Build and Test on Ubuntu
- runs-on: ubuntu-latest
- 
- steps:
- - name: Checkout repository
- uses: actions/checkout@v4
- 
- - name: Install GNAT and dependencies
- run: |
- sudo apt-get update
- sudo apt-get install -y gnat gprbuild
- sudo apt-get install -y libsdl2-dev
- 
- - name: Set environment variables
- run: |
- export GNAT_PROJECT_PATH=$PWD
- export PATH=$PATH:/usr/bin:/usr/share/gnat
- 
- - name: Build project
- run: |
- gprbuild -P adadnd.gpr  # Исправлено имя файла проекта
- 
- - name: Run unit tests
- run: |
- ./tests/run_tests
- 
- - name: Run game
- run: |
- ./main
+  build:
+    name: Build and Test on Ubuntu
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Install GNAT and dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gnat gprbuild
+        sudo apt-get install -y libsdl2-dev
+        
+    - name: Set environment variables
+      run: |
+        export GNAT_PROJECT_PATH=$PWD
+        export PATH=$PATH:/usr/bin:/usr/share/gnat
+        
+    - name: Build project
+      run: |
+        gprbuild -P adadnd.gpr
+        
+    - name: Run unit tests
+      run: |
+        ./tests/run_tests
+        
+    - name: Run game
+      run: |
+        ./main
 
- build-windows:
- name: Build and Test on Windows
- runs-on: windows-latest
- 
- steps:
- - name: Checkout repository
- uses: actions/checkout@v4
- 
- - name: Install GNAT for Windows
- run: |
- choco install gnat
- choco install mingw
- 
- - name: Build project
- run: |
- gprbuild -P adadnd.gpr  # Исправлено имя файла проекта
- 
- - name: Run tests
- run: |
- .\tests\run_tests.exe
- 
- - name: Run game
- run: |
- .\main.exe
+  build-windows:
+    name: Build and Test on Windows
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Install GNAT for Windows
+      run: |
+        choco install gnat
+        choco install mingw
+        
+    - name: Build project
+      run: |
+        gprbuild -P adadnd.gpr
+        
+    - name: Run tests
+      run: |
+        .\tests\run_tests.exe
+        
+    - name: Run game
+      run: |
+        .\main.exe
 
- build-macos:
- name: Build and Test on macOS
- runs-on: macos-latest
- 
- steps:
- - name: Checkout repository
- uses: actions/checkout@v4
- 
- - name: Install GNAT for macOS
- run: |
- brew install gnat
- brew install sdl2
- 
- - name: Build project
- run: |
- gprbuild -P adadnd.gpr  # Исправлено имя файла проекта
- 
- - name: Run tests
- run: |
- ./tests/run_tests
- 
- - name: Run game
- run: |
- ./main
+  build-macos:
+    name: Build and Test on macOS
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Install GNAT for macOS
+      run: |
+        brew install gnat
+        brew install sdl2
+        
+    - name: Build project
+      run: |
+        gprbuild -P adadnd.gpr
+        
+    - name: Run tests
+      run: |
+        ./tests/run_tests
+        
+    - name: Run game
+      run: |
+        ./main
 
- static-analysis:
- name: Static Code Analysis
- runs-on: ubuntu-latest
- 
- steps:
- - name: Checkout repository
- uses: actions/checkout@v4
- 
- - name: Install GNAT with tools
- run: |
- sudo apt-get update
- sudo apt-get install -y gnat gprbuild
- sudo apt-get install -y gnat-gps
- 
- - name: Set GNAT environment
- run: |
- export GNAT_PROJECT_PATH=$PWD
- export PATH=$PATH:/usr/bin:/usr/share/gnat
- 
- - name: Perform static analysis
- run: |
- /usr/bin/gnatmetric -a -d adadnd.gpr  # Исправлено имя файла проекта
- /usr/bin/gnatcheck -P adadnd.gpr      # Исправлено имя файла проекта
- /usr/bin/gnatstyle check -P adadnd.gpr  # Исправлено имя файла проекта
- 
- - name: Generate detailed analysis
- run: |
- /usr/bin/gnatmetric -profile -d adadnd.gpr > analysis_report.txt  # Исправлено имя файла проекта
- /usr/bin/gnatcheck -gnatc -gnatw.e -P adadnd.gpr  # Исправлено имя файла проекта
- 
- - name: Upload analysis results
- uses: actions/upload-artifact@v4
- with:
- name: analysis-results
- path: |
- analysis_report.txt
- metrics_report.html
+  static-analysis:
+    name: Static Code Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Install GNAT with tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gnat gprbuild
+        
+    - name: Set GNAT environment
+      run: |
+        export GNAT_PROJECT_PATH=$PWD
+        export PATH=$PATH:/usr/bin:/usr/share/gnat
+        
+    - name: Perform static analysis
+      run: |
+        /usr/bin/gnatmetric -a -d adadnd.gpr
+        /usr/bin/gnatcheck -P adadnd.gpr
+        /usr/bin/gnatstyle check -P adadnd.gpr
+        
+    - name: Generate detailed analysis
+      run: |
+        /usr/bin/gnatmetric -profile -d adadnd.gpr > analysis_report.txt
+        /usr/bin/gnatcheck -gnatc -gnatw.e -P adadnd.gpr
+        
+    - name: Upload analysis results
+      uses: actions/upload-artifact@v4
+      with:
+        name: analysis-results
+        path: |
+          analysis_report.txt
+          metrics_report.html
