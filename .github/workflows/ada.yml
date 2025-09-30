@@ -1,24 +1,108 @@
-name: Ada (GNAT)
+name: AdaDND Build and Test Workflow
 
 on:
   push:
-    branches: [ "master" ]
+    branches:
+      - master
   pull_request:
-    branches: [ "master" ]
+    branches:
+      - master
 
 jobs:
   build:
-
+    name: Build and Test on Ubuntu
     runs-on: ubuntu-latest
-
+    
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
-    - name: Set up GNAT toolchain
-      run: >
-        sudo apt-get update &&
-        sudo apt-get install gnat gprbuild
-
-    - name: Build
-      run: gprbuild -j0 -p
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Install GNAT and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gnat gnatcoll-dev
+          sudo apt-get install -y libsdl2-dev
+          
+      - name: Set environment variables
+        run: |
+          export GNAT_PROJECT_PATH=$PWD
+          export PATH=$PATH:/usr/bin
+          
+      - name: Build project
+        run: |
+          gnatmake -P gnat.gpr
+          
+      - name: Run unit tests
+        run: |
+          ./tests/run_tests
+          
+      - name: Run game
+        run: |
+          ./main
+          
+  build-windows:
+    name: Build and Test on Windows
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Install GNAT for Windows
+        run: |
+          choco install gnat
+          choco install mingw
+          
+      - name: Build project
+        run: |
+          gnatmake -P gnat.gpr
+          
+      - name: Run tests
+        run: |
+          .\tests\run_tests.exe
+          
+      - name: Run game
+        run: |
+          .\main.exe
+          
+  build-macos:
+    name: Build and Test on macOS
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Install GNAT for macOS
+        run: |
+          brew install gnat
+          brew install sdl2
+          
+      - name: Build project
+        run: |
+          gnatmake -P gnat.gpr
+          
+      - name: Run tests
+        run: |
+          ./tests/run_tests
+          
+      - name: Run game
+        run: |
+          ./main
+          
+  static-analysis:
+    name: Static Code Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Install GNATtools
+        run: |
+          sudo apt-get install -y gnattools
+          
+      - name: Perform static analysis
+        run: |
+          gnatmetric -a -d project.gpr
+          gnatcheck -P project.gpr
