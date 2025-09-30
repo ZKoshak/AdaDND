@@ -60,9 +60,9 @@ project AdaDND is
 --      for Body_Suffix use ".adb";
 --   end Naming;
 
-   package Builder is
-      for Default_Switch ("ada") use ("-g");
-   end Builder;
+--   package Builder is
+--      for Default_Switch ("ada") use ("-g");
+--   end Builder;
 
    -- Настройки для статического анализа
    package Static_Analysis is
