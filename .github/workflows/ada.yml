@@ -20,7 +20,7 @@ jobs:
       - name: Install GNAT and dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y gnat gnatcoll-dev
+          sudo apt-get install -y gnat
           sudo apt-get install -y libsdl2-dev
           
       - name: Set environment variables
@@ -98,22 +98,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         
-      - name: Install GNAT with analysis tools
+      - name: Install GNAT
         run: |
           sudo apt-get update
-          sudo apt-get install -y gnat gnatcoll-dev
+          sudo apt-get install -y gnat
           
       - name: Perform static analysis
         run: |
           gnatmetric -a -d project.gpr
           gnatcheck -P project.gpr
-          gnatcoll-metrics project.gpr
-          
-      - name: Check code style
-        run: |
           gnatstyle check -P project.gpr
           
-      - name: Generate and upload analysis report
+      - name: Generate detailed analysis
+        run: |
+          gnatmetric -profile -d project.gpr > analysis_report.txt
+          gnatcheck -gnatc -gnatw.e -P project.gpr
+          
+      - name: Upload analysis results
         uses: actions/upload-artifact@v4
         with:
           name: analysis-results
