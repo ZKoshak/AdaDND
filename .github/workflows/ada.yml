@@ -15,7 +15,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         
       - name: Install GNAT and dependencies
         run: |
@@ -39,14 +39,14 @@ jobs:
       - name: Run game
         run: |
           ./main
-          
+
   build-windows:
     name: Build and Test on Windows
     runs-on: windows-latest
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         
       - name: Install GNAT for Windows
         run: |
@@ -64,14 +64,14 @@ jobs:
       - name: Run game
         run: |
           .\main.exe
-          
+
   build-macos:
     name: Build and Test on macOS
     runs-on: macos-latest
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         
       - name: Install GNAT for macOS
         run: |
@@ -89,20 +89,34 @@ jobs:
       - name: Run game
         run: |
           ./main
-          
+
   static-analysis:
     name: Static Code Analysis
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         
-      - name: Install GNATtools
+      - name: Install GNAT with analysis tools
         run: |
-          sudo apt-get install -y gnattools
+          sudo apt-get update
+          sudo apt-get install -y gnat gnatcoll-dev
           
       - name: Perform static analysis
         run: |
           gnatmetric -a -d project.gpr
           gnatcheck -P project.gpr
+          gnatcoll-metrics project.gpr
+          
+      - name: Check code style
+        run: |
+          gnatstyle check -P project.gpr
+          
+      - name: Generate and upload analysis report
+        uses: actions/upload-artifact@v4
+        with:
+          name: analysis-results
+          path: |
+            analysis_report.txt
+            metrics_report.html
