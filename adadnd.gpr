@@ -9,10 +9,10 @@ project AdaDND is
       for Switches ("ada") use ("-gnatws=:v", "-gnat2022", "-g", "-O2");
    end Compiler;
 
-   package Builder is
-      for Executable_Suffix use ".exe";  -- для Windows, можно убрать для Linux/Mac
-      for Linker'Switch ("ada") use ("-lSDL2", "-lSDL2_image");  -- если используются SDL
-   end Builder;
+--   package Builder is
+--      for Executable_Suffix use ".exe";  -- для Windows, можно убрать для Linux/Mac
+--      for Linker'Switch ("ada") use ("-lSDL2", "-lSDL2_image");  -- если используются SDL
+--   end Builder;
 
    package IDE is
       for Editor use "vscode";  -- или другой редактор
