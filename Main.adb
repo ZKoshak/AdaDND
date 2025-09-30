@@ -22,9 +22,10 @@ begin
       return;
    end if;
    
-   -- Проверка существования флагов инициализации
-   if not System_Initialized'Exists or not Game_Initialized'Exists then
-      Error("Флагов инициализации не существует!");
+   -- Проверка существования и корректности флагов инициализации
+   if not System_Initialized'Exists or not Game_Initialized'Exists or 
+      not System_Initialized or not Game_Initialized then
+      Error("Флагов инициализации не существует или они имеют значение False!");
       return;
    end if;
    
@@ -74,9 +75,12 @@ begin
                end if;
             end;
             
-            -- Проверка на пустой ввод
+            -- Проверка на пустой и EOF ввод
             if Input = ASCII.NUL then
                Debug("Пустой ввод получен");
+               goto Continue_Loop;
+            elsif Input = EOF then
+               Warning("Обнаружен конец файла при вводе");
                goto Continue_Loop;
             end if;
             
@@ -102,6 +106,11 @@ begin
                      when E : others =>
                         Error("Ошибка при обработке команды '" & Input & "': " & Exception_Information(E));
                         Debug("Последняя обработанная команда: " & Last_Command);
+                        if Input in Valid_Commands then
+                           Warning("Команда валидна, но произошла ошибка при обработке");
+                        else
+                           Warning("Невалидная команда введена");
+                        end if;
                   end;
             end case;
             
@@ -135,7 +144,7 @@ begin
    end;
    
 finally
-   Info("Завершение работы игры");
+   Info("Начинается процесс завершения работы");
    begin
       if Initialized then
          begin
@@ -151,9 +160,20 @@ finally
             when E : others =>
                Error("Ошибка при завершении системы: " & Exception_Information(E));
          end;
+         
+         -- Проверка освобождения ресурсов
+         if Resources_Not_Freed then
+            Warning("Не все ресурсы были корректно освобождены!");
+         end if;
       end if;
       
-      Finalize_Logging;
+      begin
+         Finalize_Logging;
+      exception
+         when E : others =>
+            Error("Ошибка при завершении логирования: " & Exception_Information(E));
+      end;
+      
       Put_Line("Спасибо за игру!");
       
    exception
