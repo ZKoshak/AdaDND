@@ -10,6 +10,8 @@ procedure Main is
    -- Глобальные переменные
    Game_Running : Boolean := True;
    Initialized : Boolean := False;
+   Command_Error_Count : Natural := 0;
+   MAX_COMMAND_ERRORS : constant Natural := 5;
 begin
    
    -- Инициализация логирования
@@ -81,6 +83,7 @@ begin
                goto Continue_Loop;
             elsif Input = EOF then
                Warning("Обнаружен конец файла при вводе");
+               Game_Running := False;  -- Добавить принудительное завершение
                goto Continue_Loop;
             end if;
             
@@ -111,6 +114,12 @@ begin
                         else
                            Warning("Невалидная команда введена");
                         end if;
+                        -- Счётчик ошибок
+                        Command_Error_Count := Command_Error_Count + 1;
+                        if Command_Error_Count > MAX_COMMAND_ERRORS then
+                            Error("Превышено допустимое количество ошибок обработки команд");
+                            Game_Running := False;
+                        end if;
                   end;
             end case;
             
@@ -138,7 +147,7 @@ begin
          declare
             Error_Msg : String := Ada.Exceptions.Exception_Information(E);
          begin
-            Error("Критическая ошибка в главном цикле: " & Error_Msg);
+            Error("Критическая ошибка в главном цикле: " & Error_Msg, CRITICAL);
             Error("Состояние игры: " & Game_State'Image(Current_State));
          end;
    end;
@@ -164,6 +173,9 @@ finally
          -- Проверка освобождения ресурсов
          if Resources_Not_Freed then
             Warning("Не все ресурсы были корректно освобождены!");
+            -- Добавить дополнительную информацию
+            Debug("Оставшиеся ресурсы: " & Get_Remaining_Resources_Info);
+            Force_Free_Resources;
          end if;
       end if;
       
@@ -178,6 +190,6 @@ finally
       
    exception
       when E : others =>
-         Error("Критическая ошибка при завершении: " & Exception_Information(E));
+         Error("Критическая ошибка при завершении: " & Exception_Information(E), CRITICAL);
    end;
 end Main;
