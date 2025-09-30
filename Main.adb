@@ -1,5 +1,6 @@
 -- main.adb - точка входа в программу
 with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Calendar; use Ada.Calendar;
 with Game_Core; use Game_Core;
 with System_Init; use System_Init;
 with UI.Console; use UI.Console;
@@ -26,6 +27,13 @@ begin
       -- Инициализация системы
       Initialize_System;
       Initialize_Game;
+      
+      -- Проверка успешности инициализации
+      if not System_Initialized or not Game_Initialized then
+         Error("Ошибка при инициализации системы или игры!");
+         return;
+      end if;
+      
       Initialized := True;
       
       -- Логирование успешного старта
@@ -41,9 +49,17 @@ begin
       -- Основной игровой цикл
       while Game_Running loop
          declare
+            Start_Time : constant Time := Clock;
             Input : Character := Get_User_Input;
          begin
+            -- Проверка на пустой ввод
+            if Input = ASCII.NUL then
+               Debug("Пустой ввод получен");
+               goto Continue_Loop;
+            end if;
+            
             Debug("Получен ввод: " & Input);
+            
             case Input is
                when 'q' | 'Q' =>
                   Game_Running := False;
@@ -62,7 +78,7 @@ begin
                      Process_Command(Input);
                   exception
                      when E : others =>
-                        Error("Ошибка при обработке команды: " & Exception_Information(E));
+                        Error("Ошибка при обработке команды '" & Input & "': " & Exception_Information(E));
                   end;
             end case;
             
@@ -71,6 +87,15 @@ begin
             
             -- Рендеринг
             Render_Game_State;
+            
+            declare
+               End_Time : constant Time := Clock;
+               Elapsed : constant Duration := End_Time - Start_Time;
+            begin
+               Debug("Цикл выполнен за " & Duration'Image(Elapsed) & " секунд");
+            end;
+            
+            <<Continue_Loop>>;
          end;
       end loop;
       
@@ -79,16 +104,22 @@ begin
          declare
             Error_Msg : String := Ada.Exceptions.Exception_Information(E);
          begin
-            Error("Произошла ошибка: " & Error_Msg);
+            Error("Критическая ошибка в главном цикле: " & Error_Msg);
+            Error("Состояние игры: " & Game_State'Image(Current_State));
          end;
    end;
    
 finally
    Info("Завершение работы игры");
-   if Initialized then
-      Shutdown_Game;
-      Shutdown_System;
-   end if;
+   begin
+      if Initialized then
+         Shutdown_Game;
+         Shutdown_System;
+      end if;
+   exception
+      when E : others =>
+         Error("Ошибка при завершении: " & Exception_Information(E));
+   end;
    Finalize_Logging;
    Put_Line("Спасибо за игру!");
 end Main;
