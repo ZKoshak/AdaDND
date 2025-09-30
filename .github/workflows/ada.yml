@@ -14,123 +14,116 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
       
-      - name: Add AdaCore repository
-        run: |
-          sudo add-apt-repository ppa:adacore/gnat
-          sudo apt-get update
-      
-      - name: Install GNAT and dependencies
-        run: |
-          sudo apt-get install -y gnat gnat-gps
-          sudo apt-get install -y libsdl2-dev
-      
-      - name: Set environment variables
-        run: |
-          export GNAT_PROJECT_PATH=$PWD
-          export PATH=$PATH:/usr/bin:/usr/share/gnat
-      
-      - name: Build project
-        run: |
-          gnatmake -P gnat.gpr
-      
-      - name: Run unit tests
-        run: |
-          ./tests/run_tests
-      
-      - name: Run game
-        run: |
-          ./main
+    - name: Install GNAT and dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gnat
+        sudo apt-get install -y libsdl2-dev
+        
+    - name: Set environment variables
+      run: |
+        export GNAT_PROJECT_PATH=$PWD
+        export PATH=$PATH:/usr/bin:/usr/share/gnat
+        
+    - name: Build project
+      run: |
+        gnatmake -P gnat.gpr
+        
+    - name: Run unit tests
+      run: |
+        ./tests/run_tests
+        
+    - name: Run game
+      run: |
+        ./main
 
   build-windows:
     name: Build and Test on Windows
     runs-on: windows-latest
     
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
       
-      - name: Install GNAT for Windows
-        run: |
-          choco install gnat
-          choco install mingw
-      
-      - name: Build project
-        run: |
-          gnatmake -P gnat.gpr
-      
-      - name: Run tests
-        run: |
-          .\tests\run_tests.exe
-      
-      - name: Run game
-        run: |
-          .\main.exe
+    - name: Install GNAT for Windows
+      run: |
+        choco install gnat
+        choco install mingw
+        
+    - name: Build project
+      run: |
+        gnatmake -P gnat.gpr
+        
+    - name: Run tests
+      run: |
+        .\tests\run_tests.exe
+        
+    - name: Run game
+      run: |
+        .\main.exe
 
   build-macos:
     name: Build and Test on macOS
     runs-on: macos-latest
     
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
       
-      - name: Install GNAT for macOS
-        run: |
-          brew install gnat
-          brew install sdl2
-      
-      - name: Build project
-        run: |
-          gnatmake -P gnat.gpr
-      
-      - name: Run tests
-        run: |
-          ./tests/run_tests
-      
-      - name: Run game
-        run: |
-          ./main
+    - name: Install GNAT for macOS
+      run: |
+        brew install gnat
+        brew install sdl2
+        
+    - name: Build project
+      run: |
+        gnatmake -P gnat.gpr
+        
+    - name: Run tests
+      run: |
+        ./tests/run_tests
+        
+    - name: Run game
+      run: |
+        ./main
 
   static-analysis:
     name: Static Code Analysis
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
       
-      - name: Add AdaCore repository
-        run: |
-          sudo add-apt-repository ppa:adacore/gnat
-          sudo apt-get update
-      
-      - name: Install GNAT with tools
-        run: |
-          sudo apt-get install -y gnat gnat-gps
-      
-      - name: Set GNAT environment
-        run: |
-          export GNAT_PROJECT_PATH=$PWD
-          export PATH=$PATH:/usr/bin:/usr/share/gnat
-      
-      - name: Perform static analysis
-        run: |
-          gnatmetric -a -d project.gpr
-          gnatcheck -P project.gpr
-          gnatstyle check -P project.gpr
-      
-      - name: Generate detailed analysis
-        run: |
-          gnatmetric -profile -d project.gpr > analysis_report.txt
-          gnatcheck -gnatc -gnatw.e -P project.gpr
-      
-      - name: Upload analysis results
-        uses: actions/upload-artifact@v4
-        with:
-          name: analysis-results
-          path: |
-            analysis_report.txt
-            metrics_report.html
+    - name: Install GNAT with tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gnat
+        sudo apt-get install -y gnat-gps
+        
+    - name: Set GNAT environment
+      run: |
+        export GNAT_PROJECT_PATH=$PWD
+        export PATH=$PATH:/usr/bin:/usr/share/gnat
+        
+    - name: Perform static analysis
+      run: |
+        /usr/bin/gnatmetric -a -d project.gpr
+        /usr/bin/gnatcheck -P project.gpr
+        /usr/bin/gnatstyle check -P project.gpr
+        
+    - name: Generate detailed analysis
+      run: |
+        /usr/bin/gnatmetric -profile -d project.gpr > analysis_report.txt
+        /usr/bin/gnatcheck -gnatc -gnatw.e -P project.gpr
+        
+    - name: Upload analysis results
+      uses: actions/upload-artifact@v4
+      with:
+        name: analysis-results
+        path: |
+          analysis_report.txt
+          metrics_report.html
