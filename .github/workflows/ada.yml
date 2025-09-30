@@ -21,7 +21,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y gnat gprbuild
-        sudo apt-get install -y libsdl2-dev
+        sudo apt-get install -y libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev
         
     - name: Set environment variables
       run: |

@@ -23,9 +23,9 @@ project AdaDND is
       );
    end Compiler;
 
-   package Binder is
-      for Switches use ("-n");
-   end Binder;
+--   package Binder is
+--      for Switches use ("-n");
+--   end Binder;
 
    package Linker is
       for Switches ("ada") use (
@@ -35,10 +35,10 @@ project AdaDND is
       );
    end Linker;
 
-   package Ide is
-      for Build_Command use "gnatmake -P%(ProjectFile)";
-      for Run_Command use "./main";
-   end Ide;
+--   package Ide is
+--      for Build_Command use "gnatmake -P%(ProjectFile)";
+--      for Run_Command use "./main";
+--   end Ide;
 
    package Testing is
       for Source_Dirs use ("tests");
