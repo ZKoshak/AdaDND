@@ -1,82 +1,40 @@
 project AdaDND is
 
-   for Source_Dirs use (
-      "src",
-      "src/Core",
-      "src/Entities",
-      "src/World",
-      "src/UI",
-      "src/Network"
-   );
-
+   for Source_Dirs use ("src", "lib");
    for Object_Dir use "obj";
    for Exec_Dir use "bin";
    for Main use ("main.adb");
 
    package Compiler is
-      for Switches ("ada") use (
-         "-gnatws",      -- Форматирование кода
-         "-gnat2022",    -- Версия языка
-         "-gnatf",       -- Отслеживание потока управления
-         "-gnatp",       -- Оптимизация
-         "-g"           -- Отладочная информация
-      );
+      for Switches ("ada") use ("-gnatws=:v", "-gnat2022", "-g", "-O2");
    end Compiler;
 
---   package Binder is
---      for Switches use ("-n");
---   end Binder;
+   package Builder is
+      for Executable_Suffix use ".exe";  -- для Windows, можно убрать для Linux/Mac
+      for Linker'Switch ("ada") use ("-lSDL2", "-lSDL2_image");  -- если используются SDL
+   end Builder;
 
-   package Linker is
-      for Switches ("ada") use (
-         "-lSDL2",
-         "-lSDL2_image",
-         "-lSDL2_mixer"
-      );
-   end Linker;
-
---   package Ide is
---      for Build_Command use "gnatmake -P%(ProjectFile)";
---      for Run_Command use "./main";
---   end Ide;
+   package IDE is
+      for Editor use "vscode";  -- или другой редактор
+   end IDE;
 
    package Testing is
-      for Source_Dirs use ("tests");
-      for Exec_Dir use "test-bin";
-      for Object_Dir use "test-obj";
+      for Test_Command use "gnatprove";
+      for Test_Switches use ("-P", Project'Project_File, "--level=2");
    end Testing;
 
    package Project_Options is
-      for External_Dependencies use (
-         "SDL2",
-         "SDL2_image",
-         "SDL2_mixer"
-      );
+      for External_Dependencies use ("SDL2", "SDL2_image");
       for Languages use ("ada");
    end Project_Options;
 
---   package Naming is
---      for Spec_Suffix use ".ads";
---      for Body_Suffix use ".adb";
---   end Naming;
+   package Naming is
+      for Spec_Suffix use ".ads";
+      for Body_Suffix use ".adb";
+   end Naming;
 
---   package Builder is
---      for Default_Switch ("ada") use ("-g");
---   end Builder;
-
-   -- Настройки для статического анализа
-   package Static_Analysis is
-      for Switches ("ada") use (
-         "-gnatc",       -- Проверка семантики
-         "-gnatw.e"     -- Все предупреждения
-      );
-   end Static_Analysis;
-
-   -- Зависимости между пакетами
-   package Library_Dependencies is
-      for Library_Name use "AdaDND";
-      for Library_Dir use "lib";
-      for Library_Kind use "static";
-   end Library_Dependencies;
+   package Check is
+      for Switches use ("-gnatweu", "-gnatwa", "-gnatVa");
+   end Check;
 
 end AdaDND;
