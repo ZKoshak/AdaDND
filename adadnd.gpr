@@ -6,8 +6,7 @@ project AdaDND is
       "src/Entities",
       "src/World",
       "src/UI",
-      "src/Network",
-      "src/Assets"
+      "src/Network"
    );
 
    for Object_Dir use "obj";
@@ -79,13 +78,5 @@ project AdaDND is
       for Library_Dir use "lib";
       for Library_Kind use "static";
    end Library_Dependencies;
-
-   package Project_Files is
-      for Source_Files use ("Game_Core.ads", "Game_Core.adb",
-                           "Entities.ads", "Entities.adb",
-                           "World.ads", "World.adb",
-                           "UI.ads", "UI.adb",
-                           "Network.ads", "Network.adb");
-   end Project_Files;
 
 end AdaDND;
