@@ -55,10 +55,10 @@ project AdaDND is
       for Languages use ("ada");
    end Project_Options;
 
-   package Naming is
-      for Spec_Suffix use ".ads";
-      for Body_Suffix use ".adb";
-   end Naming;
+--   package Naming is
+--      for Spec_Suffix use ".ads";
+--      for Body_Suffix use ".adb";
+--   end Naming;
 
    package Builder is
       for Default_Switch ("ada") use ("-g");
